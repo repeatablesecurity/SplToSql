@@ -1,0 +1,158 @@
+---
+desc: "Basic tests"
+testData:
+  - spl: |
+        index=__your_sysmon_index__ EventCode=1 Image="C:\\Windows\\System32\\reg.exe" CommandLine="*add*\\Environment*UserInitMprLogonScript"
+    sql: |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND Image="C:\\Windows\\System32\\reg.exe" AND CommandLine LIKE "*add*\\Environment*UserInitMprLogonScript"
+  - spl: |
+        index=__your_sysmon_index__ (EventCode=12 OR EventCode=14 OR EventCode=13) TargetObject="*\\Environment*UserInitMprLogonScript"
+    sql: |
+        SELECT * FROM __your_sysmon_index__ WHERE (EventCode=12 OR EventCode=14 OR EventCode=13) AND TargetObject LIKE "*\\Environment*UserInitMprLogonScript"
+  - spl: |
+        index=__your_sysmon_index__ (EventCode=12 OR EventCode=13 OR EventCode=14) TargetObject="*\\Software\\Classes\\CLSID\\*"
+    sql: |
+        SELECT * FROM __your_sysmon_index__ WHERE (EventCode=12 OR EventCode=13 OR EventCode=14) AND TargetObject LIKE "*\\Software\\Classes\\CLSID\\*"
+  - spl: |
+        index=__your_sysmon_index__ (EventCode=12 OR EventCode=13 OR EventCode=14) (TargetObject="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\Appinit_Dlls\\*" OR TargetObject="*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\Appinit_Dlls\\*")
+    sql: |
+        SELECT * FROM __your_sysmon_index__ WHERE (EventCode=12 OR EventCode=13 OR EventCode=14) AND (TargetObject LIKE "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\Appinit_Dlls\\*" OR TargetObject LIKE "*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\Appinit_Dlls\\*")
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 Image="C:\\Windows\\*\\wmic.exe" AND CommandLine="*shadowcopy delete*"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND Image LIKE "C:\\Windows\\*\\wmic.exe" AND CommandLine LIKE "*shadowcopy delete*"
+    desc: https://car.mitre.org/analytics/CAR-2020-04-001/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND Image="C:\\Windows\\System32\\vssadmin.exe" AND CommandLine="*delete shadows*"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND Image="C:\\Windows\\System32\\vssadmin.exe" AND CommandLine LIKE "*delete shadows*"
+    desc: https://car.mitre.org/analytics/CAR-2020-04-001/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=11 AND TargetFilename="*lsass*.dmp" AND Image="C:\\Windows\\*\\taskmgr.exe"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=11 AND TargetFilename LIKE "*lsass*.dmp" AND Image LIKE "C:\\Windows\\*\\taskmgr.exe"
+    desc: https://car.mitre.org/analytics/CAR-2019-08-001/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=11 AND TargetFilename="*ntds.dit" AND Image="*ntdsutil.exe"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=11 AND TargetFilename LIKE "*ntds.dit" AND Image LIKE "*ntdsutil.exe"
+    desc: https://car.mitre.org/analytics/CAR-2019-08-002/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND Image="*\\procdump*.exe" AND CommandLine="*lsass*"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND Image LIKE "*\\procdump*.exe" AND CommandLine LIKE "*lsass*"
+    desc: https://car.mitre.org/analytics/CAR-2019-07-002/
+  - spl:  |
+        index=__your_windows_security_log_index__ EventCode=4670 AND Object_Type="File" AND Security_ID!="NT AUTHORITY\\SYSTEM"
+    sql:  |
+        SELECT * FROM __your_windows_security_log_index__ WHERE EventCode=4670 AND Object_Type="File" AND Security_ID!="NT AUTHORITY\\SYSTEM"
+    desc: https://car.mitre.org/analytics/CAR-2019-07-001/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND Image="C:\\Windows\\*\\cmd.exe" AND ParentImage="C:\\Windows\\*\\services.exe"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND Image LIKE "C:\\Windows\\*\\cmd.exe" AND ParentImage LIKE "C:\\Windows\\*\\services.exe"
+    desc: https://car.mitre.org/analytics/CAR-2014-05-002/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND ParentImage="C:\\Windows\\*\\winlogon.exe" AND Image="C:\\Windows\\*\\cmd.exe"
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND ParentImage LIKE "C:\\Windows\\*\\winlogon.exe" AND Image LIKE "C:\\Windows\\*\\cmd.exe"
+    desc: https://car.mitre.org/analytics/CAR-2014-11-008/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND (Image="*tshark.exe" OR Image="*windump.exe" OR (Image="*logman.exe" AND ParentImage!="?" AND ParentImage!="C:\\Program Files\\Windows Event Reporting\\Core\\EventReporting.AgentService.exe") OR Image="*tcpdump.exe" OR Image="*wprui.exe" OR Image="*wpr.exe")
+    sql:  |
+        SELECT * FROM __your_sysmon_index__ WHERE EventCode=1 AND (Image LIKE "*tshark.exe" OR Image LIKE "*windump.exe" OR (Image LIKE "*logman.exe" AND ParentImage!="?" AND ParentImage!="C:\\Program Files\\Windows Event Reporting\\Core\\EventReporting.AgentService.exe") OR Image LIKE "*tcpdump.exe" OR Image LIKE "*wprui.exe" OR Image LIKE "*wpr.exe")
+    desc: https://car.mitre.org/analytics/CAR-2020-11-002/
+  - spl:  |
+        index=__your_sysmon_index__ EventCode=1 AND (Image="C:\\Windows\\*\\hostname.exe" OR Image="C:\\Windows\\*\\ipconfig.exe" OR Image="C:\\Windows\\*\\net.exe" OR Image="C:\\Windows\\*\\quser.exe" OR Image="C:\\Windows\\*\\qwinsta.exe" OR (Image="C:\\Windows\\*\\sc.exe" AND (CommandLine="* query *" OR CommandLine="* qc *")) OR Image="C:\\Windows\\*\\systeminfo.exe" OR Image="C:\\Windows\\*\\tasklist.exe" OR Image="C:\\Windows\\*\\whoami.exe")|stats values(Image) as "Images" values(CommandLine) as "Command Lines" by ComputerName
+    sql:  |
+        pl
+    skip: true
+  - spl: |
+        source=foobar user=adam
+    sql: |
+        SELECT * FROM foobar WHERE user=adam
+    bigquery: |
+        SELECT * FROM foobar WHERE user=adam
+  - spl: |
+        source=foobar user=adam | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam
+  - spl: |
+        source=foobar user=adam user=alice | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND user=alice
+  - spl: |
+        source=foobar (user=adam OR user=alice) | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE (user=adam OR user=alice)
+  - spl: |
+        source=foobar (user=adam OR user=alice) AND age=18 | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE (user=adam OR user=alice) AND age=18
+  - spl: |
+        source=foobar (user=adam OR user=alice) age=18 | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE (user=adam OR user=alice) AND age=18
+  - spl: |
+        source=foobar user=adam user=alice age=18 (city="sjc" OR city="sfo") | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND user=alice AND age=18 AND (city="sjc" OR city="sfo")
+
+  - spl: |
+        source=foobar user=adam user=alice age>18 city="sjc" | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND user=alice AND age>18 AND city="sjc"
+
+  - spl: |
+        source=foobar user=adam user=alice age=18 city="A*" | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND user=alice AND age=18 AND city LIKE "A*"
+
+  - spl: |
+        source=foobar user=adam AND [source=blah rank=topper | FIELDS lastname] | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND lastname IN (SELECT lastname FROM blah WHERE rank=topper)
+  - spl: |
+        source=foobar user=adam AND [source=blah rank=topper | FIELDS lastname] age>18 | FIELDS user, email
+    sql: |
+        SELECT user, email FROM foobar WHERE user=adam AND lastname IN (SELECT lastname FROM blah WHERE rank=topper) AND age>18
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId
+    sql: |
+        SELECT user, email AS emailId FROM foobar WHERE user=adam
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId, user as username | DEDUP lastName
+    sql: |
+        SELECT DISTINCT lastName, user AS username, email AS emailId FROM foobar WHERE user=adam
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId | DEDUP lastName
+    sql: |
+        SELECT DISTINCT lastName, user, email AS emailId FROM foobar WHERE user=adam
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId | DEDUP lastName
+    sql: |
+        SELECT DISTINCT lastName, user, email AS emailId FROM foobar WHERE user=adam
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId | DEDUP lastName | STATS avg(score) BY email | SORT -lastName
+    sql: |
+        SELECT DISTINCT lastName, avg(score), user, email AS emailId FROM foobar WHERE user=adam GROUP BY email ORDER BY lastName desc
+
+  - spl: |
+        source=foobar user=adam | FIELDS user, email | RENAME email AS emailId | DEDUP lastName | STATS avg(score) BY email | SORT -lastName | HEAD 5
+    sql: |
+        SELECT TOP(5) DISTINCT lastName, avg(score), user, email AS emailId FROM foobar WHERE user=adam GROUP BY email ORDER BY lastName desc
+
+  - spl: |
+        source=vendor_table vendor_status=active | FIELDS vendor_name, id | JOIN type=inner left=v right=p WHERE v.id=p.vendor_id product_table
+    sql: |
+        SELECT vendor_name, id FROM vendor_table v INNER JOIN product_table p ON v.id=p.vendor_id WHERE vendor_status=active
+
+  - spl: |
+        source=vendor_table vendor_status=active | FIELDS vendor_name, id | JOIN type=inner left=v right=p WHERE v.id=p.vendor_id [source=blah vendor_income>1000 | FIELDS vendor_location, vendor_id]
+    sql: |
+        SELECT vendor_name, id FROM vendor_table v INNER JOIN (SELECT vendor_id, vendor_location FROM blah WHERE vendor_income>1000) p ON v.id=p.vendor_id WHERE vendor_status=active
